@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.font-display {
+  font-family: 'Fredoka One', sans-serif;
+}
+
+.bg-cream {
+  background-color: #F7F1E5;
+}
+
+.text-sage {
+  color: #7C9D96;
+}
+
+.text-orange {
+  color: #F29727;
+}
+
+.text-coral {
+  color: #E76F51;
+}
+
+.bg-sage {
+  background-color: #7C9D96;
+}
+
+.clay-card {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 30px;
+  box-shadow:
+    20px 20px 60px rgba(0, 0, 0, 0.05),
+    -20px -20px 60px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.clay-inset {
+  box-shadow:
+    inset 4px 4px 8px rgba(0, 0, 0, 0.05),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+.clay-btn-orange {
+  background: #F29727;
+  box-shadow:
+    8px 8px 16px rgba(242, 151, 39, 0.2),
+    inset 4px 4px 8px rgba(255, 255, 255, 0.3);
+}
+#sumfoot{
+    margin-top: -10px;
+}
+#tumu{
+    border-radius: 30px;
+}
