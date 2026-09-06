@@ -1,12 +1,22 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import pic1 from "../../assets/pic1.jpg";
 
 const Navbar = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
+  const navigate = useNavigate();
+
+  const token = localStorage.getItem("token");
 
   const closeMenu = () => {
     setMobileMenu(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    closeMenu();
+    navigate("/signup");
   };
 
   // =========================
@@ -51,7 +61,7 @@ const Navbar = () => {
         <div
           className="
             w-full
-            max-w-7xl
+            max-w-90rem
             mx-auto
             bg-white/80
             backdrop-blur-md
@@ -142,45 +152,27 @@ const Navbar = () => {
               ml-auto
             "
           >
-            <NavLink
-              to="/"
-              className={navLinkStyle}
-            >
+            <NavLink to="/" className={navLinkStyle}>
               Home
             </NavLink>
 
-            <NavLink
-              to="/servicesnav"
-              className={navLinkStyle}
-            >
+            <NavLink to="/servicesnav" className={navLinkStyle}>
               Services
             </NavLink>
 
-            <NavLink
-              to="/booking"
-              className={navLinkStyle}
-            >
+            <NavLink to="/booking" className={navLinkStyle}>
               Book Now
             </NavLink>
 
-            <NavLink
-              to="/shop"
-              className={navLinkStyle}
-            >
+            <NavLink to="/shop" className={navLinkStyle}>
               Shop
             </NavLink>
 
-            <NavLink
-              to="/blog"
-              className={navLinkStyle}
-            >
+            <NavLink to="/blog" className={navLinkStyle}>
               Blog
             </NavLink>
 
-            <NavLink
-              to="/about"
-              className={navLinkStyle}
-            >
+            <NavLink to="/about" className={navLinkStyle}>
               About
             </NavLink>
           </div>
@@ -222,10 +214,73 @@ const Navbar = () => {
                 active:scale-95
                 transition-all
                 whitespace-nowrap
+                -translate-x-20
               "
             >
               Book Appointment
             </NavLink>
+
+            {!token ? (
+              <>
+                {/* =========================
+                    DESKTOP SIGN IN
+                ========================= */}
+                <NavLink
+                  to="/signin"
+                  className="
+                    hidden
+                    lg:block
+                    text-sm
+                    font-bold
+                    text-[#7C9D96]/70
+                    hover:text-[#7C9D96]
+                    transition-colors
+                    whitespace-nowrap
+                  "
+                >
+                  Sign In
+                </NavLink>
+
+                {/* =========================
+                    DESKTOP SIGN UP
+                ========================= */}
+                <NavLink
+                  to="/signup"
+                  className="
+                    hidden
+                    lg:block
+                    text-sm
+                    font-bold
+                    text-[#7C9D96]/70
+                    hover:text-[#7C9D96]
+                    transition-colors
+                    whitespace-nowrap
+                  "
+                >
+                  Sign Up
+                </NavLink>
+              </>
+            ) : (
+              /* =========================
+                  DESKTOP LOGOUT
+              ========================= */
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="
+                  hidden
+                  lg:block
+                  text-sm
+                  font-bold
+                  text-[#7C9D96]/70
+                  hover:text-[#7C9D96]
+                  transition-colors
+                  whitespace-nowrap
+                "
+              >
+                Logout
+              </button>
+            )}
 
             {/* =========================
                 MOBILE TOGGLE BUTTON
@@ -289,22 +344,12 @@ const Navbar = () => {
             {/* =========================
                 MOBILE HEADER
             ========================= */}
-            <div
-              className="
-                flex
-                items-center
-                justify-between
-              "
-            >
+            <div className="flex items-center justify-between">
               {/* Mobile Logo */}
               <NavLink
                 to="/"
                 onClick={closeMenu}
-                className="
-                  flex
-                  items-center
-                  gap-2
-                "
+                className="flex items-center gap-2"
               >
                 <div
                   className="
@@ -323,22 +368,11 @@ const Navbar = () => {
                   <img
                     src={pic1}
                     alt="Pet Clinic"
-                    className="
-                      w-full
-                      h-full
-                      object-cover
-                    "
+                    className="w-full h-full object-cover"
                   />
                 </div>
 
-                <span
-                  className="
-                    text-xl
-                    sm:text-2xl
-                    font-bold
-                    text-[#7C9D96]
-                  "
-                >
+                <span className="text-xl sm:text-2xl font-bold text-[#7C9D96]">
                   Pet Clinic
                 </span>
               </NavLink>
@@ -440,6 +474,34 @@ const Navbar = () => {
               >
                 Contact
               </NavLink>
+
+              {!token ? (
+                <>
+                  <NavLink
+                    to="/signin"
+                    onClick={closeMenu}
+                    className={mobileLinkStyle}
+                  >
+                    Sign In
+                  </NavLink>
+
+                  <NavLink
+                    to="/signup"
+                    onClick={closeMenu}
+                    className={mobileLinkStyle}
+                  >
+                    Sign Up
+                  </NavLink>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="text-left text-[#7C9D96] hover:text-[#F29727] transition-colors"
+                >
+                  Logout
+                </button>
+              )}
 
               {/* =========================
                   MOBILE BOOK APPOINTMENT

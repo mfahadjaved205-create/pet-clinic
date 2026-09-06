@@ -9,6 +9,8 @@ const Call = () => {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,25 +21,49 @@ const Call = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     if (!formData.name || !formData.email || !formData.message) {
-      alert("Please fill in all fields.");
+      setError("Please fill in all fields.");
       return;
     }
 
-    setSubmitted(true);
+    setLoading(true);
 
-    setFormData({
-      name: "",
-      email: "",
-      message: "",
-    });
+    try {
+      const response = await fetch("http://localhost:5000/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    setTimeout(() => {
-      setSubmitted(false);
-    }, 3000);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Something went wrong. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      setSubmitted(true);
+      setFormData({
+        name: "",
+        email: "",
+        message: "",
+      });
+      setLoading(false);
+
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 3000);
+    } catch (err) {
+      setError("Could not connect to server. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -214,6 +240,13 @@ const Call = () => {
                   />
                 </div>
 
+                {/* Error Message */}
+                {error && (
+                  <div className="bg-red-50 text-red-600 rounded-2xl px-5 py-4 font-semibold">
+                    {error}
+                  </div>
+                )}
+
                 {/* Success Message */}
                 {submitted && (
                   <div className="bg-[#7C9D96]/10 text-[#7C9D96] rounded-2xl px-5 py-4 font-semibold">
@@ -224,9 +257,10 @@ const Call = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full py-4 md:py-5 bg-[#F29727] text-white rounded-[25px] font-bold text-base md:text-lg shadow-[8px_8px_16px_rgba(242,151,39,0.2),inset_4px_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all"
+                  disabled={loading}
+                  className="w-full py-4 md:py-5 bg-[#F29727] text-white rounded-[25px] font-bold text-base md:text-lg shadow-[8px_8px_16px_rgba(242,151,39,0.2),inset_4px_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-60 disabled:hover:scale-100"
                 >
-                  Send Message
+                  {loading ? "Sending..." : "Send Message"}
                 </button>
               </form>
             </div>

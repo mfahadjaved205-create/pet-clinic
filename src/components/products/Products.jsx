@@ -1,9 +1,10 @@
-
 import React, { useState } from "react";
-import { Heart, Plus } from "lucide-react";
-import { NavLink } from "react-router";
+import { Heart, Plus, Check } from "lucide-react";
+import { useNavigate } from "react-router";
 
 const Products = () => {
+  const navigate = useNavigate();
+
   // =========================
   // Product Data
   // =========================
@@ -49,6 +50,8 @@ const Products = () => {
     useState("All Products");
 
   const [wishlist, setWishlist] = useState([]);
+  const [addedProductId, setAddedProductId] = useState(null);
+  const [cartError, setCartError] = useState("");
 
   // =========================
   // Category Filter
@@ -74,6 +77,53 @@ const Products = () => {
 
       return [...previousWishlist, id];
     });
+  };
+
+  // =========================
+  // Add to Cart Function
+  // =========================
+  const handleAddToCart = async (product) => {
+    setCartError("");
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setCartError("Please sign in to add items to your cart.");
+      setTimeout(() => navigate("/signin"), 1500);
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          productId: String(product.id),
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          quantity: 1,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setCartError(data.message || "Could not add item to cart.");
+        return;
+      }
+
+      setAddedProductId(product.id);
+      setTimeout(() => {
+        setAddedProductId(null);
+        navigate("/cart");
+      }, 700);
+    } catch (err) {
+      setCartError("Could not connect to server. Please try again.");
+    }
   };
 
   return (
@@ -103,6 +153,15 @@ const Products = () => {
               Curated essentials for a happy, healthy pet.
             </p>
           </div>
+
+          {/* =========================
+              CART ERROR MESSAGE
+          ========================= */}
+          {cartError && (
+            <div className="mb-8 bg-red-50 text-red-600 rounded-2xl px-6 py-4 font-semibold">
+              {cartError}
+            </div>
+          )}
 
           {/* =========================
               CATEGORY BUTTONS
@@ -252,27 +311,34 @@ const Products = () => {
                   </span>
 
                   {/* ADD TO CART */}
-                  <NavLink
-                    to="/cart"
+                  <button
+                    type="button"
+                    onClick={() => handleAddToCart(product)}
                     aria-label={`Add ${product.name} to cart`}
-                    className="
+                    className={`
                       w-10
                       h-10
-                      bg-[#7C9D96]
-                      text-white
                       rounded-xl
                       flex
                       items-center
                       justify-center
                       shadow-lg
-                      hover:scale-110
-                      hover:bg-[#668981]
                       transition-all
                       duration-300
-                    "
+                      hover:scale-110
+                      ${
+                        addedProductId === product.id
+                          ? "bg-green-500 text-white"
+                          : "bg-[#7C9D96] text-white hover:bg-[#668981]"
+                      }
+                    `}
                   >
-                    <Plus className="w-6 h-6" />
-                  </NavLink>
+                    {addedProductId === product.id ? (
+                      <Check className="w-6 h-6" />
+                    ) : (
+                      <Plus className="w-6 h-6" />
+                    )}
+                  </button>
 
                 </div>
 

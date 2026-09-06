@@ -1,204 +1,296 @@
-
-import React, { useState } from "react";
-import {
-  Minus,
-  Plus,
-  Truck,
-  RotateCcw,
-  ShoppingCart,
-  Check,
-} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from "lucide-react";
+import { NavLink, useNavigate } from "react-router";
 
 const Add = () => {
-  const [quantity, setQuantity] = useState(1);
-  const [addedToCart, setAddedToCart] = useState(false);
+  const navigate = useNavigate();
 
-  const product = {
-    name: "Eco-Friendly Rope Toy",
-    category: "Toys",
-    price: 12.99,
-    image:
-      "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&q=80&w=800",
-    description:
-      "Made from 100% natural cotton fibers, this durable rope toy is perfect for heavy chewers and interactive play. Safe, sustainable, and designed to keep your pet's teeth clean.",
+  const [cart, setCart] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [updatingId, setUpdatingId] = useState(null);
+
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!token) {
+      navigate("/signin");
+      return;
+    }
+
+    const fetchCart = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/cart", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setError(data.message || "Could not load your cart.");
+          setLoading(false);
+          return;
+        }
+
+        setCart(data);
+        setLoading(false);
+      } catch (err) {
+        setError("Could not connect to server.");
+        setLoading(false);
+      }
+    };
+
+    fetchCart();
+  }, [token, navigate]);
+
+  const updateQuantity = async (productId, newQuantity) => {
+    if (newQuantity < 1) return;
+
+    setUpdatingId(productId);
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/cart/${productId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ quantity: newQuantity }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setCart(data);
+      }
+    } catch (err) {
+      setError("Could not update item.");
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
-  const increaseQuantity = () => {
-    setQuantity((prev) => prev + 1);
-    setAddedToCart(false);
+  const removeItem = async (productId) => {
+    setUpdatingId(productId);
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/cart/${productId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setCart(data);
+      }
+    } catch (err) {
+      setError("Could not remove item.");
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
-  const decreaseQuantity = () => {
-    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-    setAddedToCart(false);
-  };
+  const total =
+    cart?.items?.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    ) || 0;
 
-  const addToCart = () => {
-    setAddedToCart(true);
+  const itemCount =
+    cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
-    // Example JavaScript cart logic
-    console.log("Added to cart:", {
-      product: product.name,
-      quantity,
-      total: (product.price * quantity).toFixed(2),
-    });
-
-    // Hide success message after 2 seconds
-    setTimeout(() => {
-      setAddedToCart(false);
-    }, 2000);
-  };
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-[#F7F1E5] flex items-center justify-center">
+        <p className="text-[#7C9D96] text-lg font-semibold">
+          Loading your cart...
+        </p>
+      </main>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-[#F7F1E5] text-[#7C9D96] px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-24">
-      <section className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 xl:gap-20 items-center mt-10">
-          
-          {/* Product Image */}
-          <div className="clay-card p-4 sm:p-6 lg:p-8 bg-[#F7F1E5] rounded-[30px] shadow-[20px_20px_60px_rgba(0,0,0,0.05),-20px_-20px_60px_rgba(255,255,255,0.8)]">
-            <div className="aspect-square rounded-[25px] sm:rounded-[30px] overflow-hidden shadow-[inset_8px_8px_16px_rgba(0,0,0,0.08),inset_-8px_-8px_16px_rgba(255,255,255,0.8)]">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
+    <main className="min-h-screen bg-[#F7F1E5] text-[#7C9D96] px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-28">
+      <section className="max-w-5xl mx-auto">
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-10 sm:mb-12">
+          <div>
+            <h1 className="text-4xl sm:text-5xl font-bold text-[#7C9D96] mb-2">
+              Your <span className="text-[#F29727]">Cart.</span>
+            </h1>
+            <p className="text-[#7C9D96]/60 font-medium">
+              {itemCount > 0
+                ? `${itemCount} item${itemCount > 1 ? "s" : ""} in your cart`
+                : "Your cart is waiting to be filled"}
+            </p>
           </div>
 
-          {/* Product Information */}
-          <div className="space-y-7 sm:space-y-8">
-            
-            {/* Title and Price */}
-            <div>
-              <p className="text-[#F29727] font-bold uppercase tracking-[0.2em] text-xs sm:text-sm mb-2">
-                {product.category}
-              </p>
+          <NavLink
+            to="/shop"
+            className="hidden sm:flex items-center gap-2 bg-white px-5 py-3 rounded-2xl font-bold text-sm shadow-[8px_8px_20px_rgba(0,0,0,0.05)] hover:-translate-y-1 transition-all"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Continue Shopping
+          </NavLink>
+        </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#7C9D96] leading-tight mb-4">
-                {product.name}
-              </h1>
+        {error && (
+          <div className="mb-8 bg-red-50 text-red-600 rounded-2xl px-6 py-4 font-semibold">
+            {error}
+          </div>
+        )}
 
-              <p className="text-2xl sm:text-3xl font-bold text-[#F29727]">
-                ${product.price.toFixed(2)}
-              </p>
+        {/* Empty Cart */}
+        {!error && (!cart || !cart.items || cart.items.length === 0) && (
+          <div className="bg-white rounded-[30px] py-20 px-6 text-center shadow-[20px_20px_60px_rgba(0,0,0,0.05),-20px_-20px_60px_rgba(255,255,255,0.8)]">
+            <div className="w-20 h-20 bg-[#7C9D96]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <ShoppingBag className="w-9 h-9 text-[#7C9D96]" />
             </div>
-
-            {/* Description */}
-            <p className="text-base sm:text-lg text-[#7C9D96]/70 font-medium leading-relaxed">
-              {product.description}
+            <h2 className="text-2xl font-bold text-[#7C9D96] mb-2">
+              Your cart is empty
+            </h2>
+            <p className="text-[#7C9D96]/60 mb-8">
+              Looks like you haven't added anything yet.
             </p>
+            <NavLink
+              to="/shop"
+              className="inline-block px-8 py-4 bg-[#F29727] text-white rounded-2xl font-bold shadow-lg hover:scale-105 transition-transform"
+            >
+              Start Shopping
+            </NavLink>
+          </div>
+        )}
 
-            {/* Quantity */}
-            <div className="space-y-4">
-              <p className="font-bold text-[#7C9D96]/40 uppercase tracking-wider text-sm">
-                Quantity
-              </p>
+        {/* Cart Items + Summary */}
+        {cart && cart.items && cart.items.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-                
-                {/* Quantity Counter */}
-                <div className="flex items-center justify-center gap-5 bg-white px-5 sm:px-6 py-3 rounded-2xl shadow-[8px_8px_16px_rgba(0,0,0,0.05),-8px_-8px_16px_rgba(255,255,255,0.8)]">
-                  
-                  <button
-                    type="button"
-                    onClick={decreaseQuantity}
-                    className="text-[#7C9D96] hover:text-[#F29727] transition-colors p-1 hover:scale-110"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus className="w-5 h-5" />
-                  </button>
-
-                  <span className="font-bold text-xl w-8 text-center text-[#7C9D96]">
-                    {quantity}
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={increaseQuantity}
-                    className="text-[#7C9D96] hover:text-[#F29727] transition-colors p-1 hover:scale-110"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Add To Cart */}
-                <button
-                  type="button"
-                  onClick={addToCart}
-                  className={`flex-1 py-4 px-6 rounded-2xl font-bold text-base sm:text-lg text-white shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 ${
-                    addedToCart
-                      ? "bg-[#7C9D96]"
-                      : "bg-[#F29727]"
+            {/* Items List */}
+            <div className="lg:col-span-2 space-y-5">
+              {cart.items.map((item) => (
+                <div
+                  key={item.productId}
+                  className={`bg-white rounded-[25px] p-4 sm:p-5 flex items-center gap-4 sm:gap-6 shadow-[12px_12px_30px_rgba(0,0,0,0.05),-12px_-12px_30px_rgba(255,255,255,0.8)] transition-opacity ${
+                    updatingId === item.productId ? "opacity-50" : ""
                   }`}
                 >
-                  {addedToCart ? (
-                    <>
-                      <Check className="w-5 h-5" />
-                      Added to Cart
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="w-5 h-5" />
-                      Add to Cart
-                    </>
-                  )}
-                </button>
-              </div>
+                  {/* Image */}
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-2xl overflow-hidden bg-[#F7F1E5]">
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[#7C9D96]/30">
+                        <ShoppingBag className="w-8 h-8" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-base sm:text-lg text-[#354B47] truncate">
+                      {item.name}
+                    </h3>
+                    <p className="text-[#F29727] font-bold mt-1">
+                      ${item.price.toFixed(2)}
+                    </p>
+                  </div>
+
+                  {/* Quantity Controls */}
+                  <div className="flex items-center gap-3 bg-[#F7F1E5] px-3 py-2 rounded-2xl shrink-0">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateQuantity(item.productId, item.quantity - 1)
+                      }
+                      disabled={updatingId === item.productId}
+                      className="text-[#7C9D96] hover:text-[#F29727] transition-colors"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+
+                    <span className="font-bold w-6 text-center">
+                      {item.quantity}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateQuantity(item.productId, item.quantity + 1)
+                      }
+                      disabled={updatingId === item.productId}
+                      className="text-[#7C9D96] hover:text-[#F29727] transition-colors"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Remove */}
+                  <button
+                    type="button"
+                    onClick={() => removeItem(item.productId)}
+                    disabled={updatingId === item.productId}
+                    aria-label={`Remove ${item.name}`}
+                    className="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl text-[#E77B72] hover:bg-[#E77B72]/10 transition-colors"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              ))}
             </div>
 
-            {/* Product Features */}
-            <div className="pt-6 sm:pt-8 border-t border-[#7C9D96]/10 grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-              
-              {/* Shipping */}
-              <div className="flex items-center gap-4">
-                <div className="shrink-0 w-12 h-12 bg-[#7C9D96]/10 rounded-2xl flex items-center justify-center text-[#7C9D96] shadow-[inset_4px_4px_8px_rgba(0,0,0,0.05),inset_-4px_-4px_8px_rgba(255,255,255,0.8)]">
-                  <Truck className="w-6 h-6" />
+            {/* Order Summary */}
+            <div className="bg-white rounded-[30px] p-6 sm:p-8 shadow-[20px_20px_60px_rgba(0,0,0,0.05),-20px_-20px_60px_rgba(255,255,255,0.8)] lg:sticky lg:top-28">
+              <h2 className="text-xl font-bold text-[#7C9D96] mb-6">
+                Order Summary
+              </h2>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between text-[#7C9D96]/70 font-medium">
+                  <span>Subtotal ({itemCount} items)</span>
+                  <span>${total.toFixed(2)}</span>
                 </div>
-
-                <div>
-                  <p className="font-bold text-sm text-[#7C9D96]">
-                    Fast Shipping
-                  </p>
-
-                  <p className="text-xs text-[#7C9D96]/60 mt-1">
-                    2-3 business days
-                  </p>
+                <div className="flex justify-between text-[#7C9D96]/70 font-medium">
+                  <span>Shipping</span>
+                  <span className="text-[#F29727] font-bold">Free</span>
                 </div>
               </div>
 
-              {/* Returns */}
-              <div className="flex items-center gap-4">
-                <div className="shrink-0 w-12 h-12 bg-[#7C9D96]/10 rounded-2xl flex items-center justify-center text-[#7C9D96] shadow-[inset_4px_4px_8px_rgba(0,0,0,0.05),inset_-4px_-4px_8px_rgba(255,255,255,0.8)]">
-                  <RotateCcw className="w-6 h-6" />
-                </div>
-
-                <div>
-                  <p className="font-bold text-sm text-[#7C9D96]">
-                    Easy Returns
-                  </p>
-
-                  <p className="text-xs text-[#7C9D96]/60 mt-1">
-                    30-day guarantee
-                  </p>
+              <div className="border-t border-[#7C9D96]/10 pt-5 mb-8">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-[#7C9D96]">Total</span>
+                  <span className="text-2xl font-bold text-[#F29727]">
+                    ${total.toFixed(2)}
+                  </span>
                 </div>
               </div>
-            </div>
 
-            {/* Cart Total */}
-            <div className="bg-white/60 rounded-2xl p-4 sm:p-5 shadow-[8px_8px_20px_rgba(0,0,0,0.04)]">
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-[#7C9D96]/70">
-                  Total
-                </span>
-
-                <span className="text-xl sm:text-2xl font-bold text-[#F29727]">
-                  ${(product.price * quantity).toFixed(2)}
-                </span>
-              </div>
+              <button
+                type="button"
+                className="w-full py-4 bg-[#F29727] text-white rounded-2xl font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
+              >
+                Proceed to Checkout
+              </button>
             </div>
           </div>
-        </div>
+        )}
       </section>
     </main>
   );

@@ -4,26 +4,82 @@ import {
   Stethoscope,
   Home,
 } from "lucide-react";
+import { useNavigate, NavLink } from "react-router";
 
 const Time = () => {
+  const navigate = useNavigate();
+
   const [service, setService] = useState("");
   const [petName, setPetName] = useState("");
   const [petType, setPetType] = useState("Dog");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
+    setIsError(false);
 
     if (!service || !petName || !date || !time) {
       setMessage("Please fill in all required fields.");
+      setIsError(true);
       return;
     }
 
-    setMessage(
-      `Booking request submitted successfully for ${petName}!`
-    );
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setMessage("Please sign in first to book an appointment.");
+      setIsError(true);
+      setTimeout(() => navigate("/signin"), 1500);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          petName,
+          petType,
+          service,
+          date,
+          time,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(data.message || "Something went wrong. Please try again.");
+        setIsError(true);
+        setLoading(false);
+        return;
+      }
+
+      setMessage(
+        `Booking confirmed for ${petName}! Your slot number for this date is #${data.slotNumber}.`
+      );
+      setIsError(false);
+      setService("");
+      setPetName("");
+      setPetType("Dog");
+      setDate("");
+      setTime("");
+      setLoading(false);
+    } catch (err) {
+      setMessage("Could not connect to server. Please try again.");
+      setIsError(true);
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,6 +107,13 @@ const Time = () => {
                 Choose a service and find a time that works for you and
                 your pet.
               </p>
+
+              <NavLink
+                to="/appointments"
+                className="inline-block mt-6 px-8 py-3 bg-white text-[#7C9D96] font-bold rounded-full shadow-[8px_8px_20px_rgba(0,0,0,0.05),-8px_-8px_20px_rgba(255,255,255,0.8)] hover:scale-105 transition-transform"
+              >
+                Check All Appointments
+              </NavLink>
 
             </div>
 
@@ -267,17 +330,24 @@ const Time = () => {
 
                 {/* ================= MESSAGE ================= */}
                 {message && (
-                  <div className="p-4 rounded-2xl bg-[#7C9D96]/10 text-[#7C9D96] font-semibold text-center">
+                  <div
+                    className={`p-4 rounded-2xl font-semibold text-center ${
+                      isError
+                        ? "bg-red-50 text-red-600"
+                        : "bg-[#7C9D96]/10 text-[#7C9D96]"
+                    }`}
+                  >
                     {message}
                   </div>
                 )}
 
                 {/* ================= SUBMIT ================= */}
                 <button
-                  className="w-full py-6 bg-[#F29727] text-white rounded-[30px] font-bold text-xl shadow-xl hover:scale-[1.02] transition-all"
+                  className="w-full py-6 bg-[#F29727] text-white rounded-[30px] font-bold text-xl shadow-xl hover:scale-[1.02] transition-all disabled:opacity-60 disabled:hover:scale-100"
                   type="submit"
+                  disabled={loading}
                 >
-                  Confirm Booking Request
+                  {loading ? "Booking..." : "Confirm Booking Request"}
                 </button>
 
               </form>

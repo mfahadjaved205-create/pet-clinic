@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { NavLink } from "react-router";
 
@@ -75,17 +74,49 @@ const TwitterIcon = ({ className = "" }) => (
 const Footer = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
+    setMessage("");
+    setIsError(false);
 
     if (!email) {
       setMessage("Please enter your email.");
+      setIsError(true);
       return;
     }
 
-    setMessage("Thank you for subscribing!");
-    setEmail("");
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/newsletter", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(data.message || "Something went wrong. Please try again.");
+        setIsError(true);
+        setLoading(false);
+        return;
+      }
+
+      setMessage(data.message || "Thank you for subscribing!");
+      setIsError(false);
+      setEmail("");
+      setLoading(false);
+    } catch (err) {
+      setMessage("Could not connect to server. Please try again.");
+      setIsError(true);
+      setLoading(false);
+    }
   };
 
   return (
@@ -269,15 +300,20 @@ const Footer = () => {
 
               <button
                 type="submit"
-                className="w-full py-3 bg-[#7C9D96] text-white rounded-2xl font-bold hover:scale-105 transition-all"
+                disabled={loading}
+                className="w-full py-3 bg-[#7C9D96] text-white rounded-2xl font-bold hover:scale-105 transition-all disabled:opacity-60 disabled:hover:scale-100"
               >
-                Subscribe
+                {loading ? "Subscribing..." : "Subscribe"}
               </button>
 
             </form>
 
             {message && (
-              <p className="mt-3 text-sm font-semibold text-[#7C9D96]">
+              <p
+                className={`mt-3 text-sm font-semibold ${
+                  isError ? "text-red-600" : "text-[#7C9D96]"
+                }`}
+              >
                 {message}
               </p>
             )}
