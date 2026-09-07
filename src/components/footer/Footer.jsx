@@ -154,7 +154,7 @@ const Footer = () => {
             <div className="flex gap-4">
 
               <a
-                href="#"
+                href="https://www.instagram.com/?hl=en"
                 aria-label="Instagram"
                 className="w-10 h-10 bg-[#F7F1E5] rounded-xl flex items-center justify-center text-[#7C9D96] hover:bg-[#7C9D96] hover:text-white transition-all"
               >
@@ -162,7 +162,7 @@ const Footer = () => {
               </a>
 
               <a
-                href="#"
+                href="https://www.facebook.com/"
                 aria-label="Facebook"
                 className="w-10 h-10 bg-[#F7F1E5] rounded-xl flex items-center justify-center text-[#7C9D96] hover:bg-[#7C9D96] hover:text-white transition-all"
               >
@@ -170,7 +170,7 @@ const Footer = () => {
               </a>
 
               <a
-                href="#"
+                href="https://x.com/"
                 aria-label="Twitter"
                 className="w-10 h-10 bg-[#F7F1E5] rounded-xl flex items-center justify-center text-[#7C9D96] hover:bg-[#7C9D96] hover:text-white transition-all"
               >

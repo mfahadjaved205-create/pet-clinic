@@ -115,6 +115,7 @@ const PaymentModal = ({ total, onClose, onSuccess }) => {
     setProcessing(true);
     setProcessingStep("Verifying card details...");
 
+    // Realistic multi-step processing simulate karna
     setTimeout(() => {
       setProcessingStep("Contacting your bank...");
     }, 900);
@@ -145,7 +146,7 @@ const PaymentModal = ({ total, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
       <div className="bg-white rounded-[28px] w-full max-w-md p-6 sm:p-8 relative shadow-2xl">
         {!success && (
           <button
@@ -160,10 +161,21 @@ const PaymentModal = ({ total, onClose, onSuccess }) => {
         )}
 
         {success ? (
+          // ===== Success View =====
           <div className="py-8 text-center">
-            <div className="w-20 h-20 bg-[#7C9D96]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-11 h-11 text-[#7C9D96]" viewBox="0 0 52 52" fill="none">
-                <circle cx="26" cy="26" r="24" stroke="currentColor" strokeWidth="2.5" />
+            <div className="w-20 h-20 bg-[#7C9D96]/10 rounded-full flex items-center justify-center mx-auto mb-6 animate-[pulse_1.5s_ease-in-out]">
+              <svg
+                className="w-11 h-11 text-[#7C9D96]"
+                viewBox="0 0 52 52"
+                fill="none"
+              >
+                <circle
+                  cx="26"
+                  cy="26"
+                  r="24"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                />
                 <path
                   d="M15 27l7 7 15-15"
                   stroke="currentColor"
@@ -172,7 +184,9 @@ const PaymentModal = ({ total, onClose, onSuccess }) => {
                   strokeLinejoin="round"
                   strokeDasharray="40"
                   strokeDashoffset="40"
-                  style={{ animation: "dash 0.5s ease-out 0.3s forwards" }}
+                  style={{
+                    animation: "dash 0.5s ease-out 0.3s forwards",
+                  }}
                 />
               </svg>
             </div>
@@ -181,10 +195,12 @@ const PaymentModal = ({ total, onClose, onSuccess }) => {
               Payment successful
             </h2>
             <p className="text-[#7C9D96]/70 font-medium">
-              You paid ${total.toFixed(2)} with {cardBrand}. Redirecting to your order...
+              You paid ${total.toFixed(2)} with {cardBrand}. Redirecting to
+              your order...
             </p>
           </div>
         ) : processing ? (
+          // ===== Processing View =====
           <div className="py-14 text-center">
             <div className="w-16 h-16 border-4 border-[#F7F1E5] border-t-[#F29727] rounded-full animate-spin mx-auto mb-6"></div>
             <h2 className="text-lg font-bold text-[#354B47] mb-1">
@@ -195,6 +211,7 @@ const PaymentModal = ({ total, onClose, onSuccess }) => {
             </p>
           </div>
         ) : (
+          // ===== Payment Form =====
           <>
             <div className="flex items-center gap-3 mb-1">
               <div className="w-11 h-11 bg-[#F29727]/10 rounded-2xl flex items-center justify-center shrink-0">
@@ -225,7 +242,9 @@ const PaymentModal = ({ total, onClose, onSuccess }) => {
                   }`}
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-xs font-semibold mt-1.5">{errors.name}</p>
+                  <p className="text-red-500 text-xs font-semibold mt-1.5">
+                    {errors.name}
+                  </p>
                 )}
               </div>
 
@@ -251,7 +270,9 @@ const PaymentModal = ({ total, onClose, onSuccess }) => {
                   }`}
                 />
                 {errors.cardNumber && (
-                  <p className="text-red-500 text-xs font-semibold mt-1.5">{errors.cardNumber}</p>
+                  <p className="text-red-500 text-xs font-semibold mt-1.5">
+                    {errors.cardNumber}
+                  </p>
                 )}
               </div>
 
@@ -271,7 +292,9 @@ const PaymentModal = ({ total, onClose, onSuccess }) => {
                     }`}
                   />
                   {errors.expiry && (
-                    <p className="text-red-500 text-xs font-semibold mt-1.5">{errors.expiry}</p>
+                    <p className="text-red-500 text-xs font-semibold mt-1.5">
+                      {errors.expiry}
+                    </p>
                   )}
                 </div>
 
@@ -290,7 +313,9 @@ const PaymentModal = ({ total, onClose, onSuccess }) => {
                     }`}
                   />
                   {errors.cvv && (
-                    <p className="text-red-500 text-xs font-semibold mt-1.5">{errors.cvv}</p>
+                    <p className="text-red-500 text-xs font-semibold mt-1.5">
+                      {errors.cvv}
+                    </p>
                   )}
                 </div>
               </div>
@@ -418,7 +443,10 @@ const Add = () => {
   };
 
   const total =
-    cart?.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
+    cart?.items?.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    ) || 0;
 
   const itemCount =
     cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
@@ -479,6 +507,7 @@ const Add = () => {
           </div>
         )}
 
+        {/* Empty Cart */}
         {!error && (!cart || !cart.items || cart.items.length === 0) && (
           <div className="bg-white rounded-[30px] py-20 px-6 text-center shadow-[20px_20px_60px_rgba(0,0,0,0.05),-20px_-20px_60px_rgba(255,255,255,0.8)]">
             <div className="w-20 h-20 bg-[#7C9D96]/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -499,9 +528,11 @@ const Add = () => {
           </div>
         )}
 
+        {/* Cart Items + Summary */}
         {cart && cart.items && cart.items.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
+            {/* Items List */}
             <div className="lg:col-span-2 space-y-5">
               {cart.items.map((item) => (
                 <div
@@ -510,6 +541,7 @@ const Add = () => {
                     updatingId === item.productId ? "opacity-50" : ""
                   }`}
                 >
+                  {/* Image */}
                   <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-2xl overflow-hidden bg-[#F7F1E5]">
                     {item.image ? (
                       <img
@@ -524,6 +556,7 @@ const Add = () => {
                     )}
                   </div>
 
+                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-base sm:text-lg text-[#354B47] truncate">
                       {item.name}
@@ -533,10 +566,13 @@ const Add = () => {
                     </p>
                   </div>
 
+                  {/* Quantity Controls */}
                   <div className="flex items-center gap-3 bg-[#F7F1E5] px-3 py-2 rounded-2xl shrink-0">
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                      onClick={() =>
+                        updateQuantity(item.productId, item.quantity - 1)
+                      }
                       disabled={updatingId === item.productId}
                       className="text-[#7C9D96] hover:text-[#F29727] transition-colors"
                       aria-label="Decrease quantity"
@@ -544,11 +580,15 @@ const Add = () => {
                       <Minus className="w-4 h-4" />
                     </button>
 
-                    <span className="font-bold w-6 text-center">{item.quantity}</span>
+                    <span className="font-bold w-6 text-center">
+                      {item.quantity}
+                    </span>
 
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                      onClick={() =>
+                        updateQuantity(item.productId, item.quantity + 1)
+                      }
                       disabled={updatingId === item.productId}
                       className="text-[#7C9D96] hover:text-[#F29727] transition-colors"
                       aria-label="Increase quantity"
@@ -557,6 +597,7 @@ const Add = () => {
                     </button>
                   </div>
 
+                  {/* Remove */}
                   <button
                     type="button"
                     onClick={() => removeItem(item.productId)}
@@ -570,6 +611,7 @@ const Add = () => {
               ))}
             </div>
 
+            {/* Order Summary */}
             <div className="bg-white rounded-[30px] p-6 sm:p-8 shadow-[20px_20px_60px_rgba(0,0,0,0.05),-20px_-20px_60px_rgba(255,255,255,0.8)] lg:sticky lg:top-28">
               <h2 className="text-xl font-bold text-[#7C9D96] mb-6">
                 Order Summary

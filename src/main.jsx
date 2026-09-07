@@ -1,4 +1,5 @@
-import { StrictMode, useEffect } from 'react'
+// main.jsx
+import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, useLocation } from "react-router";
 import './index.css'
@@ -22,6 +23,8 @@ import Terms from './pages/Terms';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
 import Appointments from './pages/Appointments';
+import Loader from './pages/Loader';
+import OrderSuccess from './pages/OrderSuccess';
 
 // =========================
 // ScrollToTop — har route change pe
@@ -64,6 +67,7 @@ const Layout = () => {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/care" element={<Daycare />} />
+        <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/sum" element={<Wellness />} />
         <Route path="/pung" element={<Grooming />} />
         <Route path="/cart" element={<Tumpro />} />
@@ -78,8 +82,26 @@ const Layout = () => {
   );
 };
 
+// =========================
+// App — sabse pehle Loader dikhata hai,
+// uske baad BrowserRouter + Layout
+// =========================
+const App = () => {
+  const [loading, setLoading] = useState(true);
+
+  if (loading) {
+    return <Loader onFinish={() => setLoading(false)} />;
+  }
+
+  return (
+    <BrowserRouter>
+      <Layout />
+    </BrowserRouter>
+  );
+};
+
 createRoot(document.getElementById('root')).render(
-  <BrowserRouter>
-    <Layout />
-  </BrowserRouter>,
+  <StrictMode>
+    <App />
+  </StrictMode>
 )
