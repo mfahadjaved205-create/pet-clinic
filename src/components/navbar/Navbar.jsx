@@ -1,12 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router";
 import pic1 from "../../assets/pic1.jpg";
 
 const Navbar = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [userMenu, setUserMenu] = useState(false); // desktop dropdown toggle
+  const [mobileUserMenu, setMobileUserMenu] = useState(false); // mobile dropdown toggle
   const navigate = useNavigate();
+  const userMenuRef = useRef(null);
 
   const token = localStorage.getItem("token");
+
+  // user object se naam nikal rahe hain (agar "user" JSON string ki tarah save hai)
+  let userName = "User";
+  try {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser?.name) userName = storedUser.name;
+  } catch (e) {
+    // agar parse na ho to default "User" hi rahega
+  }
 
   const closeMenu = () => {
     setMobileMenu(false);
@@ -15,9 +27,24 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    setUserMenu(false);
+    setMobileUserMenu(false);
     closeMenu();
-    navigate("/signup");
+    navigate("/signin");
   };
+
+  // =========================
+  // Outside click pe desktop dropdown close karna
+  // =========================
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // =========================
   // Desktop Active Link Style
@@ -86,7 +113,7 @@ const Navbar = () => {
               LOGO
           ========================= */}
           <NavLink
-            to="/"
+            to="/home"
             onClick={closeMenu}
             className="
               flex
@@ -152,7 +179,7 @@ const Navbar = () => {
               ml-auto
             "
           >
-            <NavLink to="/" className={navLinkStyle}>
+            <NavLink to="/home" className={navLinkStyle}>
               Home
             </NavLink>
 
@@ -262,24 +289,101 @@ const Navbar = () => {
               </>
             ) : (
               /* =========================
-                  DESKTOP LOGOUT
+                  DESKTOP USER ICON + DROPDOWN
               ========================= */
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="
-                  hidden
-                  lg:block
-                  text-sm
-                  font-bold
-                  text-[#7C9D96]/70
-                  hover:text-[#7C9D96]
-                  transition-colors
-                  whitespace-nowrap
-                "
-              >
-                Logout
-              </button>
+              <div className="hidden lg:block relative" ref={userMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setUserMenu(!userMenu)}
+                  className="
+                    flex
+                    items-center
+                    justify-center
+                    w-10
+                    h-10
+                    rounded-full
+                    bg-[#7C9D96]
+                    text-white
+                    font-bold
+                    shadow-md
+                    hover:scale-105
+                    active:scale-95
+                    transition-all
+                    cursor-pointer
+                  "
+                  aria-label="User menu"
+                >
+                  {/* Simple user icon (SVG) */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-5 h-5"
+                  >
+                    <path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.5c-3.3 0-9.8 1.6-9.8 4.9v2.4h19.6v-2.4c0-3.3-6.5-4.9-9.8-4.9z" />
+                  </svg>
+                </button>
+
+                {userMenu && (
+                  <div
+                    className="
+                      absolute
+                      right-0
+                      mt-3
+                      w-56
+                      bg-white
+                      rounded-2xl
+                      shadow-[0_10px_40px_rgba(0,0,0,0.15)]
+                      border
+                      border-white/40
+                      py-2
+                      z-50
+                    "
+                  >
+                    {/* User Name Header */}
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm text-gray-400">Signed in as</p>
+                      <p className="text-sm font-bold text-[#7C9D96] truncate">
+                        {userName}
+                      </p>
+                    </div>
+
+                    <NavLink
+                      to="/profile"
+                      onClick={() => setUserMenu(false)}
+                      className="block px-4 py-2 text-sm font-semibold text-[#7C9D96]/80 hover:bg-[#F7F1E5] hover:text-[#7C9D96] transition-colors"
+                    >
+                      My Profile
+                    </NavLink>
+
+                    <NavLink
+                      to="/dashboard"
+                      onClick={() => setUserMenu(false)}
+                      className="block px-4 py-2 text-sm font-semibold text-[#7C9D96]/80 hover:bg-[#F7F1E5] hover:text-[#7C9D96] transition-colors"
+                    >
+                      Dashboard
+                    </NavLink>
+
+                    <NavLink
+                      to="/cart"
+                      onClick={() => setUserMenu(false)}
+                      className="block px-4 py-2 text-sm font-semibold text-[#7C9D96]/80 hover:bg-[#F7F1E5] hover:text-[#7C9D96] transition-colors"
+                    >
+                      My Orders
+                    </NavLink>
+
+                    <div className="border-t border-gray-100 mt-1 pt-1">
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
 
             {/* =========================
@@ -347,7 +451,7 @@ const Navbar = () => {
             <div className="flex items-center justify-between">
               {/* Mobile Logo */}
               <NavLink
-                to="/"
+                to="/home"
                 onClick={closeMenu}
                 className="flex items-center gap-2"
               >
@@ -420,7 +524,7 @@ const Navbar = () => {
               "
             >
               <NavLink
-                to="/"
+                to="/home"
                 onClick={closeMenu}
                 className={mobileLinkStyle}
               >
@@ -494,13 +598,72 @@ const Navbar = () => {
                   </NavLink>
                 </>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="text-left text-[#7C9D96] hover:text-[#F29727] transition-colors"
-                >
-                  Logout
-                </button>
+                /* =========================
+                    MOBILE USER ICON + DROPDOWN
+                ========================= */
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={() => setMobileUserMenu(!mobileUserMenu)}
+                    className="flex items-center gap-3 text-left"
+                  >
+                    <span
+                      className="
+                        w-9
+                        h-9
+                        flex
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-[#7C9D96]
+                        text-white
+                      "
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="w-5 h-5"
+                      >
+                        <path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.5c-3.3 0-9.8 1.6-9.8 4.9v2.4h19.6v-2.4c0-3.3-6.5-4.9-9.8-4.9z" />
+                      </svg>
+                    </span>
+                    <span className="text-[#7C9D96]">{userName}</span>
+                  </button>
+
+                  {mobileUserMenu && (
+                    <div className="flex flex-col gap-4 mt-4 ml-12 text-base font-semibold">
+                      <NavLink
+                        to="/profile"
+                        onClick={closeMenu}
+                        className={mobileLinkStyle}
+                      >
+                        My Profile
+                      </NavLink>
+                      <NavLink
+                        to="/dashboard"
+                        onClick={closeMenu}
+                        className={mobileLinkStyle}
+                      >
+                        Dashboard
+                      </NavLink>
+                      <NavLink
+                        to="/cart"
+                        onClick={closeMenu}
+                        className={mobileLinkStyle}
+                      >
+                        My Orders
+                      </NavLink>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="text-left text-red-500"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* =========================

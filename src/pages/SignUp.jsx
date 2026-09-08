@@ -63,7 +63,7 @@ const SignUp = () => {
       localStorage.setItem("user", JSON.stringify({ _id: data._id, name: data.name, email: data.email }));
 
       setLoading(false);
-      navigate("/home");
+      navigate("/signin");
     } catch (err) {
       setError("Could not connect to server. Please try again.");
       setLoading(false);

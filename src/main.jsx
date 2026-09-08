@@ -25,6 +25,8 @@ import SignIn from './pages/SignIn';
 import Appointments from './pages/Appointments';
 import Loader from './pages/Loader';
 import OrderSuccess from './pages/OrderSuccess';
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
 
 // =========================
 // ScrollToTop — har route change pe
@@ -67,10 +69,12 @@ const Layout = () => {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/care" element={<Daycare />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/sum" element={<Wellness />} />
         <Route path="/pung" element={<Grooming />} />
         <Route path="/cart" element={<Tumpro />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/hen" element={<Blogpost />} />
         <Route path="/faq" element={<Sun />} />
         <Route path="/prime" element={<Policy />} />
