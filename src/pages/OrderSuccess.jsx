@@ -361,7 +361,7 @@ const Add = () => {
 
     const fetchCart = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/cart", {
+        const response = await fetch("/api/cart", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -393,7 +393,7 @@ const Add = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/cart/${productId}`,
+        `/api/cart/${productId}`,
         {
           method: "PUT",
           headers: {
@@ -421,7 +421,7 @@ const Add = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/cart/${productId}`,
+        `/api/cart/${productId}`,
         {
           method: "DELETE",
           headers: {
